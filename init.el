@@ -206,9 +206,9 @@
 
 ;; ──────────────────────────────────── Look and feel ───────────────────────────────────
 (use-package "faces"
-  :doc "Set font and font-height. Set the height to 140 if using Emacs on Mac, else 105"
+  :doc "Set font and font-height. Set the height to 150 if using Emacs on Mac, else 105"
   :config
-  (set-face-attribute 'default nil :height (if (eq system-type 'darwin) 140 105))
+  (set-face-attribute 'default nil :height (if (eq system-type 'darwin) 150 105))
   (when (member "Hack" (font-family-list))
     (set-frame-font "Hack")))
 
