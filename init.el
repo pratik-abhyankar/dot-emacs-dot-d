@@ -94,14 +94,11 @@
 (global-set-key (kbd "H-t") 'narrow-to-defun)
 (global-set-key (kbd "H-w") 'widen)
 
-;; Display column number in mode line.
-(column-number-mode t)
-
 ;; Automatically update buffers if file content on the disk has changed.
 (global-auto-revert-mode t)
 
 
-;; ─────────────────────────── Disable unnecessary UI elements ──────────────────────────
+;; ─────────────────────────────── Customize UI elements  ───────────────────────────────
 (progn
 
   ;; Do not show tool bar.
@@ -118,6 +115,14 @@
 
   ;; Highlight line on point.
   (global-hl-line-mode t))
+
+;; Display line numbers.
+(if (version<= "26.0.50" emacs-version)
+    (global-display-line-numbers-mode)
+  (display-line-numbers-mode))
+
+;; Display column number in mode line.
+(column-number-mode t)
 
 ;; Start Emacs in fullsceen mode
 (add-to-list 'default-frame-alist '(fullscreen . maximized))
@@ -201,8 +206,9 @@
 
 ;; ──────────────────────────────────── Look and feel ───────────────────────────────────
 (use-package "faces"
+  :doc "Set font and font-height. Set the height to 140 if using Emacs on Mac, else 105"
   :config
-  (set-face-attribute 'default nil :height 105)
+  (set-face-attribute 'default nil :height (if (eq system-type 'darwin) 140 105))
   (when (member "Hack" (font-family-list))
     (set-frame-font "Hack")))
 
