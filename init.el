@@ -235,3 +235,5 @@
         doom-themes-enable-italic t)
   (load-theme 'doom-dark+ t)
   :delight)
+
+;;; init.el ends here
