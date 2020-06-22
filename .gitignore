@@ -2,6 +2,7 @@
 *~$
 places
 .recentf
+custom-file.el
 ido.last
 cider-history
 projectile-bookmarks.eld
