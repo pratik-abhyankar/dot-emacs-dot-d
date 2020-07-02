@@ -67,7 +67,13 @@
  auto-save-default nil
 
  ;; Allow commands to be run on minibuffers.
- enable-recursive-minibuffers t)
+ enable-recursive-minibuffers t
+
+ ;; Do not ring bell
+ ring-bell-function 'ignore)
+
+;; Load `custom-file` manually as we have modified the default path.
+(load-file custom-file)
 
 ;; Change all yes/no questions to y/n type
 (fset 'yes-or-no-p 'y-or-n-p)
@@ -79,9 +85,6 @@
 
 ;; `C-x o' is a 2 step key binding. `M-o' is much easier.
 (global-set-key (kbd "M-o") 'other-window)
-
-;; Unbind `save-buffers-kill-terminal` to avoid accidentally quiting Emacs.
-(global-unset-key (kbd "C-x C-c"))
 
 ;; Delete whitespace just when a file is saved.
 (add-hook 'before-save-hook 'delete-trailing-whitespace)
@@ -166,6 +169,133 @@
   (global-flycheck-mode)
   :delight)
 
+(use-package which-key
+  :doc "Prompt the next possible key bindings after a short wait"
+  :ensure t
+  :config
+  (which-key-mode t)
+  :delight)
+
+(use-package ibuffer
+  :doc "Better buffer management"
+  :bind ("C-x C-b" . ibuffer)
+  :delight)
+
+(use-package projectile
+  :doc "Project navigation"
+  :ensure t
+  :config
+  (projectile-mode t)
+  :bind ("C-x f" . projectile-find-file)
+  :delight)
+
+(use-package magit
+  :doc "Git integration for Emacs"
+  :ensure t
+  :bind ("C-x g" . magit-status)
+  :delight)
+
+(use-package ivy
+  :doc "A generic completion mechanism"
+  :ensure t
+  :config
+  (ivy-mode t)
+  (setq ivy-use-virtual-buffers t
+
+        ;; Display index and count both.
+        ivy-count-format "(%d/%d) "
+
+        ;; By default, all ivy prompts start with `^'. Disable that.
+        ivy-initial-inputs-alist nil)
+
+  :bind (("C-x b" . ivy-switch-buffer)
+         ("C-x B" . ivy-switch-buffer-other-window))
+  :delight)
+
+(use-package ivy-rich
+  :doc "Have additional information in empty space of ivy buffers."
+  :disabled t
+  :ensure t
+  :custom
+  (ivy-rich-path-style 'abbreviate)
+  :config
+  (setcdr (assq t ivy-format-functions-alist)
+          #'ivy-format-function-line)
+  (ivy-rich-mode 1)
+  :delight)
+
+(use-package swiper
+  :doc "A better search"
+  :ensure t
+  :bind (("C-s" . swiper-isearch)
+         ("H-s" . isearch-forward-regexp))
+  :delight)
+
+(use-package counsel
+  :doc "Ivy enhanced Emacs commands"
+  :ensure t
+  :bind (("M-x" . counsel-M-x)
+         ("C-x C-f" . counsel-find-file)
+         ("C-'" . counsel-imenu)
+         ("C-c s" . counsel-rg)
+         :map counsel-find-file-map
+         ("RET" . ivy-alt-done))
+  :delight)
+
+(use-package aggressive-indent
+  :doc "Intended Indentation"
+  :ensure t
+  :config
+  (add-hook 'before-save-hook 'aggressive-indent-indent-defun)
+  ;; Have a way to save without indentation.
+  ;; (defun save-without-aggresive-indentation ()
+  ;;   (interactive)
+  ;;   (remove-hook 'before-save-hook 'aggressive-indent-indent-defun)
+  ;;   (save-buffer)
+  ;;   (add-hook 'before-save-hook 'aggressive-indent-indent-defun))
+  ;; :bind (("C-x s" . save-without-aggresive-indentation))
+  :delight)
+
+(use-package git-gutter
+  :doc "Shows modified lines"
+  :ensure t
+  :config
+  (setq git-gutter:modified-sign "|")
+  (setq git-gutter:added-sign "|")
+  (setq git-gutter:deleted-sign "|")
+  (global-git-gutter-mode t)
+  :delight)
+
+(use-package multiple-cursors
+  :doc "A minor mode for editing with multiple cursors"
+  :ensure t
+  :config
+  (setq mc/always-run-for-all t)
+  :bind
+  ;; Use multiple cursor bindings only when a region is active
+  (:map region-bindings-mode-map
+        ("C->" . mc/mark-next-like-this)
+        ("C-<" . mc/mark-previous-like-this)
+        ("C-c a" . mc/mark-all-like-this)
+        ("C-c h" . mc-hide-unmatched-lines-mode)
+        ("C-c l" . mc/edit-lines))
+  :delight)
+
+(use-package pdf-tools
+  :doc "Better pdf viewing"
+  :disabled t
+  :ensure t
+  :mode ("\\.pdf\\'" . pdf-view-mode)
+  :bind (:map pdf-view-mode-map
+              ("j" . image-next-line)
+              ("k" . image-previous-line))
+  :delight)
+
+(use-package define-word
+  :doc "Dictionary in Emacs."
+  :ensure t
+  :bind ("C-c w" . define-word-at-point)
+  :delight)
 
 ;; ─────────────────────────────── Programming Languages ────────────────────────────────
 ;; Install 'black' python code formattor. Required for elpy.
@@ -234,6 +364,10 @@
   (setq doom-themes-enable-bold t
         doom-themes-enable-italic t)
   (load-theme 'doom-dark+ t)
+  :delight)
+
+(use-package org-bullets
+  :ensure t
   :delight)
 
 ;;; init.el ends here
