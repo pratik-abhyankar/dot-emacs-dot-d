@@ -2,7 +2,7 @@
 ;;; Commentary:
 ;;; Author: Pratik Abhyankar
 ;;; Created on: 17 May 2020
-;;; Copyright (c) 2020 Pratik Abhyankar <abhyankarpratik@gmail.com>
+;;; Copyright (c) 2020 Pratik Abhyankar <https://pratikabhyankar.com>
 
 ;;; Credit: This Emacs configuration is adapted from the GitHub repository
 ;;; "dot-emacs-dot-d" created by Suvrat Apte <suvratapte@gmail.com>
@@ -307,6 +307,10 @@
   :delight)
 
 ;; ─────────────────────────────── Programming Languages ────────────────────────────────
+
+;; Python Setup
+;; --------------------------------------------------------------------------------------
+
 ;; Install 'black' python code formattor. Required for elpy.
 (use-package blacken
   :ensure t
@@ -340,6 +344,20 @@
 ;; Use Ein package for creating and running Jupyter notebooks from within Emacs
 (use-package ein
   :ensure t
+  :delight)
+
+
+;; Web Development Setup
+;; --------------------------------------------------------------------------------------
+
+(use-package emmet-mode
+  :doc "Install for improved HTML and CSS workflow (https://emmet.io)"
+  :ensure t
+  :config
+  (add-hook 'sgml-mode-hook 'emmet-mode) ;; Auto-start on any markup modes
+  (add-hook 'css-mode-hook  'emmet-mode) ;; enable Emmet's css abbreviation.
+  (setq emmet-move-cursor-between-quotes t)
+  :bind ("TAB" . emmet-expand-line)
   :delight)
 
 
