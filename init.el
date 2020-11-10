@@ -93,7 +93,7 @@
 (global-set-key (kbd "M-o") 'other-window)
 
 ;; Delete whitespace just when a file is saved.
-(add-hook 'before-save-hook 'delete-trailing-whitespace)
+;; (add-hook 'before-save-hook 'delete-trailing-whitespace)
 
 ;; Enable narrowing commands.
 (put 'narrow-to-region 'disabled nil)
@@ -359,6 +359,19 @@
   (setq emmet-move-cursor-between-quotes t)
   :bind ("TAB" . emmet-expand-line)
   :delight)
+
+
+;; Miscellaneous Setup
+;; --------------------------------------------------------------------------------------
+(use-package markdown-mode
+  :doc "Markdown support in Emacs. I use 'pandoc' for preview and export, which is installed
+        separately via the system's package manager like 'brew install pandoc'"
+  :ensure t
+  :commands (markdown-mode gfm-mode)
+  :mode (("README\\.md\\'" . gfm-mode)
+         ("\\.md\\'" . markdown-mode)
+         ("\\.markdown\\'" . markdown-mode))
+  :init (setq markdown-command "/usr/local/bin/pandoc"))
 
 
 ;; ──────────────────────────────────── Look and feel ───────────────────────────────────
