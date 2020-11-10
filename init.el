@@ -5,7 +5,7 @@
 ;;; Copyright (c) 2020 Pratik Abhyankar <https://pratikabhyankar.com>
 
 ;;; Credit: This Emacs configuration is adapted from the GitHub repository
-;;; "dot-emacs-dot-d" created by Suvrat Apte <suvratapte@gmail.com>
+;;; "dot-emacs-dot-d" created by Suvrat Apte <https://github.com/suvratapte/dot-emacs-dot-d>
 
 ;; This file is not part of GNU Emacs.
 
@@ -23,9 +23,12 @@
 
 ;; Add melpa to package archives.
 (add-to-list 'package-archives
-	     '("melpa" . "http://melpa.milkbox.net/packages/") t)
+	     '("melpa" . "https://melpa.org/packages/") t)
 
-;; Load and activate emacs packages. Do this first so that the packages are loaded before
+;; Update the package contents when Emacs starts
+(package-refresh-contents)
+
+;; Load and activate Emacs packages. Do this first so that the packages are loaded before
 ;; you start trying to modify them.  This also sets the load path.
 (package-initialize)
 
@@ -71,6 +74,9 @@
 
  ;; Do not ring bell
  ring-bell-function 'ignore)
+
+;; Set line-spacing and line-height. TODO: Find solution to vertically align the font to line.
+(setq default-text-properties '(line-spacing 0.2 line-height 0.2))
 
 ;; Load `custom-file` manually as we have modified the default path.
 (load-file custom-file)
@@ -166,6 +172,12 @@
   :ensure t
   :delight)
 
+(use-package dashboard
+  :doc "Set a good Emacs startup screen"
+  :ensure t
+  :config
+  (dashboard-setup-startup-hook))
+
 (use-package ace-jump-mode
   :doc "Jump around the visible buffer using 'Head Chars'"
   :ensure t
@@ -173,6 +185,7 @@
   :delight)
 
 (use-package flycheck
+  :doc "Spellcheck in Emacs"
   :ensure t
   :config
   (global-flycheck-mode)
@@ -251,20 +264,6 @@
          ("RET" . ivy-alt-done))
   :delight)
 
-(use-package aggressive-indent
-  :doc "Intended Indentation"
-  :ensure t
-  :config
-  (add-hook 'before-save-hook 'aggressive-indent-indent-defun)
-  ;; Have a way to save without indentation.
-  ;; (defun save-without-aggresive-indentation ()
-  ;;   (interactive)
-  ;;   (remove-hook 'before-save-hook 'aggressive-indent-indent-defun)
-  ;;   (save-buffer)
-  ;;   (add-hook 'before-save-hook 'aggressive-indent-indent-defun))
-  ;; :bind (("C-x s" . save-without-aggresive-indentation))
-  :delight)
-
 (use-package git-gutter
   :doc "Shows modified lines"
   :ensure t
@@ -298,6 +297,7 @@
   :bind (:map pdf-view-mode-map
               ("j" . image-next-line)
               ("k" . image-previous-line))
+  :config (pdf-tools-install)
   :delight)
 
 (use-package define-word
@@ -363,7 +363,8 @@
 
 ;; ──────────────────────────────────── Look and feel ───────────────────────────────────
 (use-package "faces"
-  :doc "Set font and font-height. Set the height to 150 if using Emacs on Mac, else 105"
+  :doc "Set font and font-height. Set the height to 150 if using Emacs on Mac, else 105.
+        This also assumes that you have already installed the 'Hack' font on your target system"
   :config
   (set-face-attribute 'default nil :height (if (eq system-type 'darwin) 150 105))
   (when (member "Hack" (font-family-list))
@@ -376,6 +377,26 @@
   (powerline-center-theme)
   :delight)
 
+(use-package dired-sidebar
+  :bind (("C-x C-n" . dired-sidebar-toggle-sidebar))
+  :ensure t
+  :commands (dired-sidebar-toggle-sidebar)
+  :init
+  (add-hook 'dired-sidebar-mode-hook
+            (lambda ()
+              (unless (file-remote-p default-directory)
+                (auto-revert-mode))))
+  :config
+  (push 'toggle-window-split dired-sidebar-toggle-hidden-commands)
+  (push 'rotate-windows dired-sidebar-toggle-hidden-commands)
+
+  (setq dired-sidebar-subtree-line-prefix "__")
+  (setq dired-sidebar-theme 'vscode)
+  (setq dired-sidebar-use-term-integration t)
+  (setq dired-sidebar-use-custom-font t)
+  :delight)
+
+;; I am not using this color scheme at the moment.
 (use-package ewal-spacemacs-themes
   :disabled t
   :ensure t
@@ -393,8 +414,39 @@
   (load-theme 'doom-dark+ t)
   :delight)
 
-(use-package org-bullets
-  :ensure t
-  :delight)
+
+;; ──────────────────────────────────── Bindings ───────────────────────────────────
+(bind-key "C-j" 'newline-and-indent)
+
+(bind-key "M-g" 'goto-line)
+(bind-key "M-n" 'open-line-below)
+(bind-key "M-p" 'open-line-above)
+(bind-key "M-+" 'text-scale-increase)
+(bind-key "M-_" 'text-scale-decrease)
+(bind-key "M-k" 'kill-this-buffer)
+(bind-key "M-]" 'next-buffer)
+(bind-key "M-[" 'previous-buffer)
+(bind-key "M-`" 'other-frame)
+
+(bind-key
+ "C-8"
+ (lambda ()
+   (interactive)
+   (find-file user-init-file)))
+
+(bind-key
+ "C-M-8"
+ (lambda ()
+   (interactive)
+   (load-file user-init-file)))
+
+;; ──────────────────────────────────── Org Mode ───────────────────────────────────
+(load-file "~/.emacs.d/org-config.el")
+
+;; Open agenda view when Emacs is started.
+;;(jump-to-org-agenda)
+(delete-other-windows)
+
+(provide 'init)
 
 ;;; init.el ends here
