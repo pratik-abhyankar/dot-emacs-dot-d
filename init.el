@@ -86,8 +86,8 @@
 
 ;; Make the command key behave as 'meta'
 (when (eq system-type 'darwin)
-  (setq mac-command-modifier 'meta)
-  (setq mac-right-command-modifier 'hyper))
+ (setq mac-command-modifier 'meta))
+;;  (setq mac-right-command-modifier 'hyper))
 
 ;; `C-x o' is a 2 step key binding. `M-o' is much easier.
 (global-set-key (kbd "M-o") 'other-window)
@@ -291,7 +291,6 @@
 
 (use-package pdf-tools
   :doc "Better pdf viewing"
-  :disabled t
   :ensure t
   :mode ("\\.pdf\\'" . pdf-view-mode)
   :bind (:map pdf-view-mode-map
@@ -380,8 +379,8 @@
         This also assumes that you have already installed the 'Hack' font on your target system"
   :config
   (set-face-attribute 'default nil :height (if (eq system-type 'darwin) 150 105))
-  (when (member "Hack" (font-family-list))
-    (set-frame-font "Hack")))
+  (when (member "Monaco" (font-family-list))
+    (set-frame-font "Monaco")))
 
 (use-package powerline
   :doc "Better mode line"
@@ -452,6 +451,13 @@
  (lambda ()
    (interactive)
    (load-file user-init-file)))
+
+
+;; ─────────────────────────────────── Ledger Mode ─────────────────────────────────
+(use-package ledger-mode
+  :ensure t
+  :delight)
+
 
 ;; ──────────────────────────────────── Org Mode ───────────────────────────────────
 (load-file "~/.emacs.d/org-config.el")

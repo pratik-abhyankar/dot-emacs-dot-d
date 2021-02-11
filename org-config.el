@@ -1,4 +1,3 @@
-
 ;;; org-config.el --- My Org mode configuration.
 ;;; Commentary:
 ;;; Author: Pratik Abhyankar
@@ -35,6 +34,15 @@
    ;; Open the link at point when RET is pressed
    org-return-follows-link t
 
+   ;; Use LOGBOOK drawer to take notes
+   org-log-into-drawer t
+
+   ;; Add 'closed' log when marked done
+   org-log-done t
+   
+   ;; C-{a,e} should behave differently on headings
+   org-special-ctrl-a/e t
+   
    ;; ToDo task statuses
    ;; Adding a "!" adds a timestamp when the status is set. Adding a "@" adds a note to that task
    org-todo-keywords '((sequence
@@ -42,7 +50,7 @@
 
    org-todo-keyword-faces-doom-dark-theme
    '(("TODO" :foreground "#d62d2d" :weight bold)
-     ("IN-PROGRESS" :foreground "#22d3e3" :weight bold)
+     ("STARTED" :foreground "#22d3e3" :weight bold)
      ("WAITING" :foreground "#eb8934" :weight bold)
      ("CANCELED" :foreground "#737373" :weight bold)
      ("DONE" :foreground "#2b8c0b" :weight bold))
@@ -50,8 +58,19 @@
   org-todo-keyword-faces org-todo-keyword-faces-doom-dark-theme
 
   org-enforce-todo-dependencies t
-  org-enforce-todo-checkbox-dependencies t)
+  org-enforce-todo-checkbox-dependencies t
 
+  ;; When dependencies are enforced (by both vars above), agenda views highlight tasks
+  ;; highlights blocked tasks i.e. tasks with incomplete sub tasks.
+  org-agenda-dim-blocked-tasks nil
+
+  org-agenda-skip-scheduled-if-done t
+
+  org-agenda-block-separator
+  (propertize
+  "────────────────────────────────────────────────────────────────────────"
+  'face '(:foreground "#81a1c1")))
+  
   :bind (:map
          global-map
          ("C-c c" . org-capture)
