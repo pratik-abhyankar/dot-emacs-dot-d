@@ -58,6 +58,9 @@
  ;; Do not create lockfiles.
  create-lockfiles nil
 
+ ;; Change buffer focus to help window when opened
+ help-window-select t
+ 
  ;; Don't use hard tabs
  indent-tabs-mode nil
 
@@ -89,12 +92,6 @@
  (setq mac-command-modifier 'meta))
 ;;  (setq mac-right-command-modifier 'hyper))
 
-;; `C-x o' is a 2 step key binding. `M-o' is much easier.
-(global-set-key (kbd "M-o") 'other-window)
-
-;; Delete whitespace just when a file is saved.
-;; (add-hook 'before-save-hook 'delete-trailing-whitespace)
-
 ;; Enable narrowing commands.
 (put 'narrow-to-region 'disabled nil)
 (put 'narrow-to-page 'disabled nil)
@@ -106,6 +103,8 @@
 ;; Automatically update buffers if file content on the disk has changed.
 (global-auto-revert-mode t)
 
+;; Start Emacsserver so that emacsclient can be used
+(server-start)
 
 ;; ─────────────────────────────── Customize UI elements  ───────────────────────────────
 (progn
@@ -223,13 +222,10 @@
   :config
   (ivy-mode t)
   (setq ivy-use-virtual-buffers t
-
         ;; Display index and count both.
         ivy-count-format "(%d/%d) "
-
         ;; By default, all ivy prompts start with `^'. Disable that.
         ivy-initial-inputs-alist nil)
-
   :bind (("C-x b" . ivy-switch-buffer)
          ("C-x B" . ivy-switch-buffer-other-window))
   :delight)
@@ -296,7 +292,10 @@
   :bind (:map pdf-view-mode-map
               ("j" . image-next-line)
               ("k" . image-previous-line))
-  :config (pdf-tools-install)
+  :config
+  (pdf-tools-install)
+  (add-hook 'pdf-view-mode-hook (lambda () (display-line-numbers-mode -1)))
+  (setq-default pdf-view-display-size 'fit-page)
   :delight)
 
 (use-package define-word
@@ -305,46 +304,67 @@
   :bind ("C-c w" . define-word-at-point)
   :delight)
 
+(use-package company
+  :doc "COMplete ANYthing"
+  :ensure t
+  :bind (:map
+         global-map
+         ("TAB" . company-complete-common-or-cycle)
+         ;; Use hippie expand as secondary auto complete. It is useful as it is
+         ;; 'buffer-content' aware (it uses all buffers for that).
+         ("M-/" . hippie-expand)
+         :map company-active-map
+         ("C-n" . company-select-next)
+         ("C-p" . company-select-previous))
+  :config
+  (setq company-idle-delay 0.1)
+  (global-company-mode t)
+
+  ;; Configure hippie expand as well.
+  (setq hippie-expand-try-functions-list
+        '(try-expand-dabbrev
+          try-expand-dabbrev-all-buffers
+          try-expand-dabbrev-from-kill
+          try-complete-lisp-symbol-partially
+          try-complete-lisp-symbol))
+  :delight)
+
+
+;; ────────────────────── Language Server Protocol (LSP) Client ─────────────────────────
+(use-package lsp-mode
+  :ensure t
+  :init
+  (setq lsp-keymap-prefix "C-c l")
+  :hook (
+         (python-mode . lsp)
+         (java-mode . lsp)
+         (lsp-mode . lsp-enable-which-key-integration))
+  :commands lsp)
+
+(use-package lsp-ui
+  :commands lsp-ui-mode
+  :delight)
+
+(use-package lsp-ivy
+  :commands lsp-ivy-workspace-symbol
+  :delight)
+
+(use-package lsp-treemacs
+  :commands lsp-treemacs-errors-list
+  :delight)
+
+
 ;; ─────────────────────────────── Programming Languages ────────────────────────────────
 
 ;; Python Setup
 ;; --------------------------------------------------------------------------------------
-
-;; Install 'black' python code formattor. Required for elpy.
-(use-package blacken
+(use-package lsp-python-ms
   :ensure t
+  :init (setq lsp-python-ms-auto-install-server t)
+  :hook (python-mode . (lambda ()
+                          (require 'lsp-python-ms)
+                          (lsp)))
   :delight)
-
-(use-package elpy
-  :ensure t
-  :init
-  (elpy-enable)
-  :config
-  (setq elpy-rpc-python-command "python3")
-  :delight)
-
-;; Enable Flycheck
-(when (require 'flycheck nil t)
-  (setq elpy-modules (delq 'elpy-module-flymake elpy-modules))
-  (add-hook 'elpy-mode-hook 'flycheck-mode))
-
-;; Enable blacken to format on save
-(add-hook 'elpy-mode-hook (lambda ()
-                            (add-hook 'before-save-hook
-                                      'elpy-black-fix-code nil t)))
-
-;; Use Jupyter Python interpreter instead of default Python Interpreter
-(setq python-shell-interpreter "jupyter"
-      python-shell-interpreter-args "console --simple-prompt"
-      python-shell-prompt-detect-failure-warning nil)
-(add-to-list 'python-shell-completion-native-disabled-interpreters
-             "jupyter")
-
-;; Use Ein package for creating and running Jupyter notebooks from within Emacs
-(use-package ein
-  :ensure t
-  :delight)
-
 
 ;; Web Development Setup
 ;; --------------------------------------------------------------------------------------
@@ -439,6 +459,7 @@
 (bind-key "M-]" 'next-buffer)
 (bind-key "M-[" 'previous-buffer)
 (bind-key "M-`" 'other-frame)
+(bind-key "M-o" 'other-window)
 
 (bind-key
  "C-8"
